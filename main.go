@@ -18,7 +18,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("example-controller")
+var log = logf.Log.WithName("oopsie-controller")
 
 func main() {
 	logf.SetLogger(zap.Logger(false))
@@ -40,48 +40,23 @@ func main() {
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(log.Info)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: typedcorev1.New(clientset.CoreV1().RESTClient()).Events("")})
-	recorder := eventBroadcaster.NewRecorder(mgr.GetScheme(), corev1.EventSource{Component: "StackOverflow :-)"})
+	recorder := eventBroadcaster.NewRecorder(mgr.GetScheme(), corev1.EventSource{Component: "StackOverflow)"})
 
 	// Setup a new controller to reconcile ReplicaSets
 	entryLog.Info("Setting up controller")
-	c, err := controller.New("foo-controller", mgr, controller.Options{
-		Reconciler: &reconcileReplicaSet{client: mgr.GetClient(), recorder: recorder, log: log.WithName("reconciler")},
+	c, err := controller.New("oopsie-event-controller", mgr, controller.Options{
+		Reconciler: &reconcileEvent{client: mgr.GetClient(), recorder: recorder, log: log.WithName("reconciler")},
 	})
 	if err != nil {
 		entryLog.Error(err, "unable to set up individual controller")
 		os.Exit(1)
 	}
 
-	//informer := cache.NewSharedIndexInformer(&cache.ListWatch{
-	//	ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-	//		return clientset.CoreV1().Events("").List(options)
-	//	},
-	//	WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-	//		return clientset.CoreV1().Events("").Watch(options)
-	//	},
-	//},
-	//&corev1.Event{},
-	//0,
-	//cache.Indexers{})
-
 	// Watch Events and enqueue Events object key
 	if err := c.Watch(&source.Kind{Type: &corev1.Event{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		entryLog.Error(err, "unable to watch events")
 		os.Exit(1)
 	}
-
-	//// Watch ReplicaSets and enqueue ReplicaSet object key
-	//if err := c.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestForObject{}); err != nil {
-	//	entryLog.Error(err, "unable to watch ReplicaSets")
-	//	os.Exit(1)
-	//}
-	//
-	//// Watch Pods and enqueue owning ReplicaSet key
-	//if err := c.Watch(&source.Kind{Type: &corev1.Pod{}},
-	//	&handler.EnqueueRequestForOwner{OwnerType: &appsv1.ReplicaSet{}, IsController: true}); err != nil {
-	//	entryLog.Error(err, "unable to watch Pods")
-	//	os.Exit(1)
-	//}
 
 	entryLog.Info("starting manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
