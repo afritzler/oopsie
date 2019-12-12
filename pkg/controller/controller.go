@@ -1,4 +1,4 @@
-package main
+package controller
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	otypes "github.com/afritzler/oopsie/pkg/types"
 	"github.com/go-logr/logr"
 	"k8s.io/client-go/tools/record"
 
@@ -19,33 +20,25 @@ import (
 )
 
 // reconcileReplicaSet reconciles ReplicaSets
-type reconcileEvent struct {
+type ReconcileEvent struct {
 	// client can be used to retrieve objects from the APIServer.
-	client   client.Client
-	log      logr.Logger
-	recorder record.EventRecorder
-}
-
-type Answers struct {
-	Items []Item `json:"items,omitempty`
-}
-
-type Item struct {
-	Link string `json:"link,omitempty"`
+	Client   client.Client
+	Log      logr.Logger
+	Recorder record.EventRecorder
 }
 
 // Implement reconcile.Reconciler so the controller can reconcile objects
-var _ reconcile.Reconciler = &reconcileEvent{}
+var _ reconcile.Reconciler = &ReconcileEvent{}
 
-func (r *reconcileEvent) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileEvent) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// set up a convenient log object so we don't have to type request over and over again
-	log := r.log.WithValues("request", request)
+	log := r.Log.WithValues("request", request)
 
 	if request == (reconcile.Request{}) {
 		return reconcile.Result{}, nil
 	}
 	event := &corev1.Event{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, event)
+	err := r.Client.Get(context.TODO(), request.NamespacedName, event)
 	if errors.IsNotFound(err) {
 		log.Error(nil, "Could not find Events")
 		return reconcile.Result{}, nil
@@ -87,13 +80,13 @@ func (r *reconcileEvent) Reconcile(request reconcile.Request) (reconcile.Result,
 			return reconcile.Result{}, err
 		}
 
-		var anyJSON Answers
+		var anyJSON otypes.Answers
 		json.Unmarshal(body, &anyJSON)
 
 		if len(anyJSON.Items) > 0 && anyJSON.Items[0].Link != "" {
 			link := anyJSON.Items[0].Link
 			log.Info("Fired event")
-			r.recorder.Event(&event.InvolvedObject, v1.EventTypeNormal, "Hint", link)
+			r.Recorder.Event(&event.InvolvedObject, v1.EventTypeNormal, "Hint", link)
 		}
 
 	}

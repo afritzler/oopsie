@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	oc "github.com/afritzler/oopsie/pkg/controller"
 )
 
 var log = logf.Log.WithName("oopsie-controller")
@@ -45,7 +46,7 @@ func main() {
 	// Setup a new controller to reconcile ReplicaSets
 	entryLog.Info("Setting up controller")
 	c, err := controller.New("oopsie-event-controller", mgr, controller.Options{
-		Reconciler: &reconcileEvent{client: mgr.GetClient(), recorder: recorder, log: log.WithName("reconciler")},
+		Reconciler: &oc.ReconcileEvent{Client: mgr.GetClient(), Recorder: recorder, Log: log.WithName("reconciler")},
 	})
 	if err != nil {
 		entryLog.Error(err, "unable to set up individual controller")
