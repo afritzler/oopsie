@@ -1,4 +1,4 @@
-GOCMD=go
+GOCMD=GO111MODULE="on" go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test

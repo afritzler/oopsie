@@ -2,6 +2,7 @@ package provider
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -35,12 +36,7 @@ func (s *StackOverflowProvider) EmitEvent(event v1.Event) error {
 			log.Error(err, "failed to construct request")
 			return err
 		}
-		q := req.URL.Query()
-		q.Add("order", "desc")
-		q.Add("sort", "votes")
-		q.Add("intitle", event.Message)
-		q.Add("site", "stackoverflow")
-		req.URL.RawQuery = q.Encode()
+		req.URL.RawQuery = s.constructQuery(event.Message, req)
 
 		resp, err := http.Get(req.URL.String())
 		if err != nil {
@@ -61,9 +57,20 @@ func (s *StackOverflowProvider) EmitEvent(event v1.Event) error {
 
 		if len(anyJSON.Items) > 0 && anyJSON.Items[0].Link != "" {
 			link := anyJSON.Items[0].Link
-			log.Info("Fired event for object %v", event.InvolvedObject)
-			s.Recorder.Event(&event.InvolvedObject, v1.EventTypeNormal, "Hint", link)
+			errorHint := fmt.Sprintf("For error '%s' I found something here -> %s", event.Message, link)
+			log.Infof("Fired event for object %+v", event.InvolvedObject)
+			s.Recorder.Event(&event.InvolvedObject, v1.EventTypeNormal, "Hint", errorHint)
 		}
 	}
 	return nil
+}
+
+// constructQuery contructs a RAW request query string
+func (s *StackOverflowProvider) constructQuery(message string, req *http.Request) string {
+	q := req.URL.Query()
+	q.Add("order", "desc")
+	q.Add("sort", "votes")
+	q.Add("intitle", message)
+	q.Add("site", "stackoverflow")
+	return q.Encode()
 }
