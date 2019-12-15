@@ -14,7 +14,7 @@ Kubernetes is a great tool for orchestrating containerized workloads on a fleet 
 
 <p align="center"><img src="docs/images/shipit.gif" width="200"></p>
 
-Oopsie helps you, the people on Slack or community mailing lists saving time by answering questions to problems which already have been solved.
+Oopsie helps you, the people on Slack or community mailing lists, save time by answering questions to problems which already have been solved.
 
 ## Usage
 
