@@ -6,6 +6,8 @@
 
 Oopsie [/ˈuːpsi/] is a Kubernetes controller that watches all `Events` within a cluster and enriches failed objects with solutions found on [StackOverflow](https://stackoverflow.com) ([Github](https://github.com) and other sources following soon).
 
+![recording](docs/images/recording.gif)
+
 ## Why Oopsie?
 
 Kubernetes is a great tool for orchestrating containerized workloads on a fleet of machines. Unfortunatelly, it is sometimes not that easy for new Kubernetes users to resolve problems which occur in their deployments. The illustration below is a visual representation of what happens when you deploy your first application after having mastered the [Wordpress and Guestbook examples](https://github.com/kubernetes/examples).
