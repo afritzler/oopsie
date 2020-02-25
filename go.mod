@@ -34,4 +34,7 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace k8s.io/client-go => k8s.io/client-go v0.17.3
+replace (
+	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.4.0
+	k8s.io/client-go => k8s.io/client-go v0.17.3
+)
