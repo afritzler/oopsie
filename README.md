@@ -33,6 +33,12 @@ cd oopsie
 make build
 ```
 
+Alternatively you can build the `oopsie` binary using a Docker container
+
+```shell
+make docker-build
+```
+
 In order to use `oopsie` you will need to point `KUBECONFIG` to the path `kubeconfig` of your Kubernetes cluster.
 
 If you have a [kind](https://github.com/kubernetes-sigs/kind) based cluster running, you can set the `KUBECONFIG` prior to running `oopsie`.

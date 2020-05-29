@@ -11,6 +11,4 @@ require (
 	sigs.k8s.io/controller-runtime v0.6.0
 )
 
-replace (
-	k8s.io/client-go => k8s.io/client-go v0.18.3
-)
+replace k8s.io/client-go => k8s.io/client-go v0.18.3

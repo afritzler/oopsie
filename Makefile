@@ -24,3 +24,6 @@ deps:
 # Cross compilation
 build-linux:
 		CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_LINUX) -v
+
+docker-build:
+	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/github.com/afritzler/oopsie golang:latest go build -o "$(BINARY_NAME)" -v
