@@ -21,11 +21,8 @@ type ReconcileEvent struct {
 	Provider []provider.Provider
 }
 
-// Implement reconcile.Reconciler so the controller can reconcile objects
-var _ reconcile.Reconciler = &ReconcileEvent{}
-
 // Reconcile reconciles all events.
-func (r *ReconcileEvent) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileEvent) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	// set up a convenient log object so we don't have to type request over and over again
 	log := r.Log.WithValues("request", request)
 
