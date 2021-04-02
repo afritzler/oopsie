@@ -1,11 +1,11 @@
-FROM golang:1.16.2
+FROM golang:1.16.2 AS builder
 WORKDIR /go/src/github.com/afritzler/oopsie
 COPY . .
 ENV GO111MODULE=on
 RUN make build
 
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+FROM alpine:3.13.4
+RUN apk --no-cache add ca-certificates=20191127-r5
 WORKDIR /
-COPY --from=0 /go/src/github.com/afritzler/oopsie/oopsie .
+COPY --from=builder /go/src/github.com/afritzler/oopsie/oopsie .
 CMD ["/oopsie"]
