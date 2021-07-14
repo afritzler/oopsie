@@ -1,4 +1,4 @@
-FROM golang:1.16.5 AS builder
+FROM golang:1.16.6 AS builder
 WORKDIR /go/src/github.com/afritzler/oopsie
 COPY . .
 ENV GO111MODULE=on
