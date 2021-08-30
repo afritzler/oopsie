@@ -4,7 +4,7 @@ COPY . .
 ENV GO111MODULE=on
 RUN make build
 
-FROM alpine:3.14.1
+FROM alpine:3.14.2
 RUN apk --no-cache add ca-certificates=20191127-r5
 WORKDIR /
 COPY --from=builder /go/src/github.com/afritzler/oopsie/oopsie .
