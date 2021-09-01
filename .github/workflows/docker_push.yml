@@ -15,7 +15,7 @@ on:
 
   # Run on published releases
   release:
-    types: [published]
+    types: [released]
 
 env:
   IMAGE_NAME: oopsie
