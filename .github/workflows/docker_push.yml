@@ -13,6 +13,10 @@ on:
   # Run tests for any PRs.
   pull_request:
 
+  # Run on published releases
+  release:
+    types: [published]
+
 env:
   IMAGE_NAME: oopsie
 
