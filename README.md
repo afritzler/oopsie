@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/images/logo_v1.png" width="250"></p>
 
 # oopsie
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/afritzler/oopsie)](https://goreportcard.com/report/github.com/afritzler/oopsie)
 <a href="https://gitter.im/k8s-oopsie/community"><img alt="Gitter" src="https://img.shields.io/gitter/room/k8s-oopsie/community"></a> <a href="https://github.com/afritzler/oopsie/actions"><img src="https://github.com/afritzler/oopsie/workflows/Docker/badge.svg"></a> <a href="https://github.com/afritzler/oopsie/blob/master/LICENSE"><img src="https://img.shields.io/github/license/afritzler/oopsie"></a> <a href="https://github.com/afritzler/oopsie"><img src="https://img.shields.io/github/stars/afritzler/oopsie?style=social"></a> <a href="https://twitter.com/afritzler"><img src="https://img.shields.io/twitter/follow/afritzler?style=social"></a>
 
 
