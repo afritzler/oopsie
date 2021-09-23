@@ -32,13 +32,11 @@ func (r *ReconcileEvent) Reconcile(ctx context.Context, request reconcile.Reques
 	event := &corev1.Event{}
 	err := r.Client.Get(context.TODO(), request.NamespacedName, event)
 	if errors.IsNotFound(err) {
-		log.Error(nil, "Could not find Events")
-		return reconcile.Result{}, nil
+		return reconcile.Result{}, fmt.Errorf("could not find events for %s: %s", request.NamespacedName, err)
 	}
 
 	if err != nil {
-		log.Error(err, "Could not fetch Events")
-		return reconcile.Result{}, err
+		return reconcile.Result{}, fmt.Errorf("could not get events for %s: %s", request.NamespacedName, err)
 	}
 
 	// Output found events
@@ -46,7 +44,9 @@ func (r *ReconcileEvent) Reconcile(ctx context.Context, request reconcile.Reques
 
 	// Loop over provider
 	for _, p := range r.Provider {
-		p.EmitEvent(*event)
+		if err := p.EmitEvent(*event); err != nil {
+			return reconcile.Result{}, fmt.Errorf("failed to emit event for %s: %s", request.NamespacedName, err)
+		}
 	}
 
 	return reconcile.Result{}, nil

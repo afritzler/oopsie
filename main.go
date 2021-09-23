@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"k8s.io/client-go/kubernetes"
@@ -10,7 +11,6 @@ import (
 	oc "github.com/afritzler/oopsie/pkg/controller"
 	op "github.com/afritzler/oopsie/pkg/provider"
 	corev1 "k8s.io/api/core/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -21,7 +21,8 @@ import (
 )
 
 func main() {
-	var log = log.Log.WithName("oopsie-controller")
+
+	log := log.FromContext(context.Background())
 	entryLog := log.WithName("entrypoint")
 
 	// Setup a Manager

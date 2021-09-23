@@ -1,4 +1,4 @@
-name-template: 'v$RESOLVED_VERSION 🌈'
+name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: '🚀 Features'
@@ -48,5 +48,4 @@ autolabeler:
       - '/JIRA-[0-9]{1,4}/'
 template: |
   ## Changes
-
   $CHANGES
