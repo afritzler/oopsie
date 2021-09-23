@@ -25,35 +25,32 @@ type StackOverflowProvider struct {
 	Recorder record.EventRecorder
 }
 
-var _ Provider = &StackOverflowProvider{}
-
 // EmitEvent fires an event if an answer for an error was found.
 func (s *StackOverflowProvider) EmitEvent(event v1.Event) error {
 	if event.Type == corev1.EventTypeWarning && event.Message != "" {
 		log.Infof("found event with warning: event %s with reason %s", event.Type, event.Message)
 		req, err := http.NewRequest("GET", stackOverFlowAPI, nil)
 		if err != nil {
-			log.Error(err, "failed to construct request")
-			return err
+			return fmt.Errorf("failed to construct request: %s", err)
 		}
 		req.URL.RawQuery = s.constructQuery(event.Message, req)
 
 		resp, err := http.Get(req.URL.String())
 		if err != nil {
-			log.Error(err, "failed to query backend")
-			return err
+			return fmt.Errorf("failed to query backend: %s", err)
 		}
 
 		defer resp.Body.Close()
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Error(err, "failed to get response body")
-			return err
+			return fmt.Errorf("failed to get response body: %s", err)
 		}
 
 		var anyJSON otypes.StackOverflowAnswers
-		json.Unmarshal(body, &anyJSON)
+		if err := json.Unmarshal(body, &anyJSON); err != nil {
+			return fmt.Errorf("failed to unmarshal response json: %s", err)
+		}
 
 		if len(anyJSON.Items) > 0 && anyJSON.Items[0].Link != "" {
 			link := anyJSON.Items[0].Link

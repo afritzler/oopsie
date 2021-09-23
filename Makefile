@@ -1,4 +1,4 @@
-GOCMD=GO111MODULE="on" go
+GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
@@ -8,13 +8,15 @@ BINARY_LINUX=$(BINARY_NAME)_linux
 
 all: test build
 build:
-		$(GOBUILD) -o $(BINARY_NAME) -v
+		$(GOBUILD) -o $(BINARY_NAME) -v main.go
 test:
 		$(GOTEST) -v ./...
 clean:
 		$(GOCLEAN)
 		rm -f $(BINARY_NAME)
 		rm -f $(BINARY_LINUX)
+lint:
+		golangci-lint run
 run:
 		$(GOBUILD) -o $(BINARY_NAME) -v main.go
 		./$(BINARY_NAME)
