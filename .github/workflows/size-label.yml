@@ -1,6 +1,6 @@
 name: Size Label
 
-on: pull_request
+on: pull_request_target
 
 jobs:
   size-label:
