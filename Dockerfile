@@ -7,7 +7,7 @@ COPY main.go main.go
 COPY pkg/ pkg/
 RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o oopsie main.go
 
-FROM alpine:3.15.1
+FROM alpine:3.15.2
 RUN apk --no-cache add ca-certificates
 WORKDIR /
 COPY --from=builder /workspace/oopsie .
