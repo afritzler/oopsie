@@ -3,13 +3,13 @@ package provider
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-logr/logr"
 	"io/ioutil"
 	"net/http"
 
 	otypes "github.com/afritzler/oopsie/pkg/types"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/prometheus/common/log"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 )
@@ -23,12 +23,13 @@ const (
 // StackOverflowProvider defines the StackOverflow provider.
 type StackOverflowProvider struct {
 	Recorder record.EventRecorder
+	Log      logr.Logger
 }
 
 // EmitEvent fires an event if an answer for an error was found.
 func (s *StackOverflowProvider) EmitEvent(event v1.Event) error {
 	if event.Type == corev1.EventTypeWarning && event.Message != "" {
-		log.Infof("found event with warning: event %s with reason %s", event.Type, event.Message)
+		s.Log.Info("found warning event event", "Event", event.Type, "Message", event.Message)
 		req, err := http.NewRequest("GET", stackOverFlowAPI, nil)
 		if err != nil {
 			return fmt.Errorf("failed to construct request: %s", err)
@@ -55,7 +56,7 @@ func (s *StackOverflowProvider) EmitEvent(event v1.Event) error {
 		if len(anyJSON.Items) > 0 && anyJSON.Items[0].Link != "" {
 			link := anyJSON.Items[0].Link
 			errorHint := fmt.Sprintf("For error '%s' I found something here -> %s", event.Message, link)
-			log.Infof("Fired event for object %+v", event.InvolvedObject)
+			s.Log.Info("fired event for object", "Object", event.InvolvedObject)
 			s.Recorder.Event(&event.InvolvedObject, v1.EventTypeNormal, "Hint", errorHint)
 		}
 	}
