@@ -46,6 +46,7 @@ func main() {
 	providers := make([]op.Provider, 0)
 	stackProvider := &op.StackOverflowProvider{
 		Recorder: stackRecorder,
+		Log:      log,
 	}
 	providers = append(providers, stackProvider)
 
