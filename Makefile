@@ -1,31 +1,42 @@
-GOCMD=go
-GOBUILD=$(GOCMD) build
-GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test
-GOGET=$(GOCMD) get
 BINARY_NAME=oopsie
-BINARY_LINUX=$(BINARY_NAME)_linux
+
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
+# Image URL to use all building/pushing image targets
+IMG ?= oopsie:latest
+
+# Setting SHELL to bash allows bash commands to be executed by recipes.
+# This is a requirement for 'setup-envtest.sh' in the test target.
+# Options are set to exit when a recipe line exits non-zero or a piped command fails.
+SHELL = /usr/bin/env bash -o pipefail
+.SHELLFLAGS = -ec
+
+help: ## Display this help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 all: test build
-build:
-		$(GOBUILD) -o $(BINARY_NAME) -v main.go
-test:
-		$(GOTEST) -v ./...
-clean:
-		$(GOCLEAN)
+
+build: ## Build the oopsie binary.
+		go build -o $(BINARY_NAME) -v main.go
+
+test: ## Run tests.
+		go test -v ./...
+
+clean: ## Clean build artefacts.
+		go clean
 		rm -f $(BINARY_NAME)
-		rm -f $(BINARY_LINUX)
-lint:
-		golangci-lint run
-run:
+
+lint: ## Run golangci-lint against code.
+		golangci-lint run ./...
+
+run: ## Run oopsie.
 		$(GOBUILD) -o $(BINARY_NAME) -v main.go
 		./$(BINARY_NAME)
-deps:
-		# $(GOGET) ...
 
-# Cross compilation
-build-linux:
-		CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_LINUX) -v
-
-docker-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/github.com/afritzler/oopsie golang:latest go build -o "$(BINARY_NAME)" -v
+docker-build: test ## Build docker image with the manager.
+		docker build -t ${IMG} .
