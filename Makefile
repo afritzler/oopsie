@@ -22,21 +22,30 @@ help: ## Display this help.
 all: test build
 
 build: ## Build the oopsie binary.
-		go build -o $(BINARY_NAME) -v main.go
+	go build -o $(BINARY_NAME) -v main.go
 
 test: ## Run tests.
-		go test -v ./...
+	go test -v ./...
 
 clean: ## Clean build artefacts.
-		go clean
-		rm -f $(BINARY_NAME)
+	go clean
+	rm -f $(BINARY_NAME)
 
 lint: ## Run golangci-lint against code.
-		golangci-lint run ./...
+	golangci-lint run ./...
+
+addlicense: ## Add license headers to all go files.
+	find . -name '*.go' -exec go run github.com/google/addlicense -c 'Andreas Fritzler' {} +
+
+.PHONY: checklicense
+checklicense: ## Check that every file has a license header present.
+	find . -name '*.go' -exec go run github.com/google/addlicense  -check -c 'Andreas Fritzler' {} +
+
+check:  checklicense lint test
 
 run: ## Run oopsie.
-		$(GOBUILD) -o $(BINARY_NAME) -v main.go
-		./$(BINARY_NAME)
+	$(GOBUILD) -o $(BINARY_NAME) -v main.go
+	./$(BINARY_NAME)
 
 docker-build: test ## Build docker image with the manager.
-		docker build -t ${IMG} .
+	docker build -t ${IMG} .

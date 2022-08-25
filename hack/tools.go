@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package provider
+//go:build tools
+
+package hack
 
 import (
-	v1 "k8s.io/api/core/v1"
+	// Use addlicense for adding license headers.
+	_ "github.com/google/addlicense"
 )
-
-// Provider is an interface for the answers provider.
-type Provider interface {
-	EmitEvent(event v1.Event) error
-}
