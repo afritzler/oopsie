@@ -5,9 +5,9 @@ go 1.19
 require (
 	github.com/go-logr/logr v1.2.3
 	github.com/google/addlicense v1.0.0
-	k8s.io/api v0.25.3
-	k8s.io/apimachinery v0.25.3
-	k8s.io/client-go v0.25.3
+	k8s.io/api v0.25.4
+	k8s.io/apimachinery v0.25.4
+	k8s.io/client-go v0.25.4
 	sigs.k8s.io/controller-runtime v0.13.1
 )
 
