@@ -3,7 +3,7 @@ module github.com/afritzler/oopsie
 go 1.19
 
 require (
-	github.com/go-logr/logr v1.2.3
+	github.com/go-logr/logr v1.2.4
 	github.com/google/addlicense v1.1.1
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
