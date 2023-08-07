@@ -28,7 +28,6 @@ import (
 )
 
 const (
-	// ProviderName defines the name of the provider.
 	ProviderName     = "StackOverflow"
 	stackOverFlowAPI = "https://api.stackexchange.com/2.2/search"
 )
@@ -37,6 +36,10 @@ const (
 type StackOverflowProvider struct {
 	Recorder record.EventRecorder
 	Log      logr.Logger
+}
+
+func (s *StackOverflowProvider) GetName() string {
+	return ProviderName
 }
 
 // EmitEvent fires an event if an answer for an error was found.
