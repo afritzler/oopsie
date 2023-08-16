@@ -15,35 +15,59 @@
 package main
 
 import (
-	"context"
+	"flag"
 	"os"
-
-	"k8s.io/client-go/kubernetes"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/tools/record"
 
 	oc "github.com/afritzler/oopsie/pkg/controller"
 	op "github.com/afritzler/oopsie/pkg/provider"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
-	"sigs.k8s.io/controller-runtime/pkg/source"
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/tools/record"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
+var (
+	scheme   = runtime.NewScheme()
+	setupLog = ctrl.Log.WithName("setup")
+)
+
+func init() {
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+}
+
 func main() {
+	var metricsAddr string
+	var enableLeaderElection bool
+	var probeAddr string
+	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
+		"Enable leader election for controller manager. "+
+			"Enabling this will ensure there is only one active controller manager.")
 
-	log := log.FromContext(context.Background())
-	entryLog := log.WithName("entrypoint")
+	opts := zap.Options{
+		Development: true,
+	}
+	opts.BindFlags(flag.CommandLine)
+	flag.Parse()
 
-	// Setup a Manager
-	entryLog.Info("setting up manager")
-	mgr, err := manager.New(config.GetConfigOrDie(), manager.Options{})
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		Scheme:                 scheme,
+		MetricsBindAddress:     metricsAddr,
+		Port:                   9443,
+		HealthProbeBindAddress: probeAddr,
+		LeaderElection:         enableLeaderElection,
+		LeaderElectionID:       "80b1bac7.afritzler.github.io",
+	})
 	if err != nil {
-		entryLog.Error(err, "unable to set up overall controller manager")
+		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
@@ -53,40 +77,27 @@ func main() {
 	}
 
 	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(log.Info)
+	eventBroadcaster.StartLogging(setupLog.Info)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: typedcorev1.New(clientset.CoreV1().RESTClient()).Events("")})
 	stackRecorder := eventBroadcaster.NewRecorder(mgr.GetScheme(), corev1.EventSource{Component: "StackOverflow"})
-	// TODO: register Github provider here
 	providers := make([]op.Provider, 0)
-	stackProvider := &op.StackOverflowProvider{
+	providers = append(providers, &op.StackOverflowProvider{
 		Recorder: stackRecorder,
-		Log:      log,
-	}
-	providers = append(providers, stackProvider)
-
-	// Setup a new controller to reconcile
-	entryLog.Info("Setting up controller")
-	c, err := controller.New("oopsie-event-controller", mgr, controller.Options{
-		Reconciler: &oc.ReconcileEvent{Client: mgr.GetClient(),
-			Log:      log.WithName("reconciler"),
-			Provider: providers,
-		},
+		Log:      setupLog,
 	})
 
-	if err != nil {
-		entryLog.Error(err, "unable to set up individual controller")
+	if err = (&oc.ReconcileEvent{
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		Provider: providers,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Guestbook")
 		os.Exit(1)
 	}
 
-	// Watch Events and enqueue Events object key
-	if err := c.Watch(&source.Kind{Type: &corev1.Event{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		entryLog.Error(err, "unable to watch events")
-		os.Exit(1)
-	}
-
-	entryLog.Info("starting manager")
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		entryLog.Error(err, "unable to run manager")
+	setupLog.Info("starting manager")
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
 }

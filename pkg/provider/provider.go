@@ -21,4 +21,5 @@ import (
 // Provider is an interface for the answers provider.
 type Provider interface {
 	EmitEvent(event v1.Event) error
+	GetName() string
 }
