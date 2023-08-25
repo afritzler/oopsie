@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/go-logr/logr v1.2.4
 	github.com/google/addlicense v1.1.1
-	k8s.io/api v0.28.0
-	k8s.io/apimachinery v0.28.0
+	k8s.io/api v0.28.1
+	k8s.io/apimachinery v0.28.1
 	k8s.io/client-go v0.28.0
 	sigs.k8s.io/controller-runtime v0.15.1
 )
